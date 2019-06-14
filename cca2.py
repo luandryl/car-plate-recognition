@@ -1,3 +1,4 @@
+import sys
 from skimage.io import imread
 from skimage.filters import threshold_otsu
 import matplotlib.pyplot as plt

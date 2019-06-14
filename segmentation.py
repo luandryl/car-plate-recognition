@@ -12,6 +12,7 @@ todo
     :-> the licence_plate its passed by a fixed index of plate_like_obj, make this dinamic 
         and find a way to remove non plate_like objects from this vector to proced
 '''
+print (cca2.plate_like_obj[0])
 license_plate = np.invert(cca2.plate_like_obj[0])
 labelled_plate = measure.label(license_plate)
 
