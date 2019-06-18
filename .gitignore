@@ -1,4 +1,3 @@
 cpr/
-cca2.pyc
-segmentation.pyc
+*.pyc
 art
