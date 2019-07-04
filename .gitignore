@@ -1,3 +1,4 @@
 cpr/
 *.pyc
-art
+car_img_repo/
+.vscode/
