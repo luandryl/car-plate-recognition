@@ -1,3 +1,6 @@
+#! usr/bin/env python
+# -*- coding: UTF-8 -*-
+
 import sys
 import numpy as np 
 import cv2 as cv
@@ -5,6 +8,12 @@ import imutils
 import pytesseract
 import os
 
+def auto_canny (image, sigma=0.33):
+        v = np.median(image)
+        lower = int(max(0, (1 - sigma) * v ))
+        upper = int(min(255, (1 + sigma) * v ))
+        ed = cv.Canny(image, lower, upper)
+        return ed
 
 def recog(car):
         image = cv.imread(car)
@@ -13,7 +22,7 @@ def recog(car):
         
         image_gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
         image_gray = cv.bilateralFilter(image_gray, 11, 17, 17)
-        edged = cv.Canny(image_gray, 30, 200)
+        edged = auto_canny(image_gray)
         
         # cv.imshow("Edged", edged)
         
@@ -39,14 +48,20 @@ def recog(car):
                 (x, y) = np.where(mask == 255)
                 (topx, topy) = (np.min(x), np.min(y))
                 (bottomx, bottomy) = (np.max(x), np.max(y))
-                licence_plate = image_gray[topx:bottomx+1, topy:bottomy+1]
+                licence_plate = image[topx:bottomx+1, topy:bottomy+1]
                 
-                cv.imshow("plate", licence_plate)
+                licence_plate = cv.cvtColor(licence_plate, cv.COLOR_BGR2GRAY)
+                licence_plate = cv.GaussianBlur(licence_plate, (5, 5), 0)
+                
+                tmp, imgThs = cv.threshold(licence_plate,0,255,cv.THRESH_OTSU+cv.THRESH_BINARY)
+
+
+                # cv.imshow("plate", imgThs)
 
                 plate_array = []
                 car_info = []
 
-                text = pytesseract.image_to_string(licence_plate)
+                text = pytesseract.image_to_string(imgThs)
                 car_info.append(car)
                 car_info.append(text)
                 plate_array.append(car_info)
@@ -61,7 +76,7 @@ def recog(car):
 
 
 def dump_directory ():
-        path = './car_img_repo/'
+        path = './car_img_repo/new_dataset/'
         files = os.listdir(path)
         licence_plates = []
 
@@ -71,12 +86,13 @@ def dump_directory ():
                 plate_text = recog(string_img)
                 if (plate_text is not -1):
                         licence_plates.append(recog(string_img))
+        print("\n\n Output => \n")
 
         for car in licence_plates:
                 print car
 
 def normalize_dir ():
-        path = './car_img_repo/'
+        path = './car_img_repo/new_dataset/'
         files = os.listdir(path)
         for index, file in enumerate(files):
                 os.rename(os.path.join(path, file), os.path.join(path, str(index)+'.jpg'))
@@ -90,8 +106,3 @@ if(len(sys.argv) > 1):
                 print(recog(sys.argv[1]))
 else:
         dump_directory()
-
-# inspect_img()
-# normalize_dir()
-
-
